@@ -1,5 +1,5 @@
 pipeline {
-    agent("smith")
+    agent { "smith" }
     options {
         skipDefaultCheckout true
     }
