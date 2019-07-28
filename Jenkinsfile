@@ -9,9 +9,10 @@ pipeline {
         string(name: 'Greeting', defaultValue: 'Hello', description: 'How should I greet the world?')
 
         choice(name: 'b2b_pipeline_action',
+                defaultValue: 'build-and-deploy',
                 description: 'Perform full build pipeline (default) or fast deployment of previous system build (docker image tag)',
-                choices: ['build-and-deploy', 'fast-deploy'],
-                defaultValue: 'build-and-deploy')
+                choices: ['build-and-deploy', 'fast-deploy']
+                )
     }
 
     stages {
