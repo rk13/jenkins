@@ -7,12 +7,8 @@ pipeline {
 
     parameters {
         string(name: 'Greeting', defaultValue: 'Hello', description: 'How should I greet the world?')
-
-        choice(name: 'b2b_pipeline_action',
-                defaultValue: 'build-and-deploy',
-                description: 'Perform full build pipeline (default) or fast deployment of previous system build (docker image tag)',
-                choices: ['build-and-deploy', 'fast-deploy']
-                )
+        booleanParam(name: 'B2B_FAST_DEPLOY_FLAG', defaultValue: false, description: 'Perform fast deployment of previous system build (docker image tag)')
+        string(name: 'B2B_FAST_DEPLOY_VERSION', defaultValue: null, description: 'Previous system build (docker image tag)')
     }
 
     stages {
@@ -23,7 +19,7 @@ pipeline {
         }
         stage('Build') {
             when {
-                expression { return params.b2b_pipeline_action == 'build-and-deploy' }
+                expression { return !params.B2B_FAST_DEPLOY_FLAG }
             }
             steps {
                 sh 'Building the system ..."'
@@ -31,7 +27,7 @@ pipeline {
         }
         stage('Test') {
             when {
-                expression { return params.b2b_pipeline_action == 'build-and-deploy' }
+                expression { return !params.B2B_FAST_DEPLOY_FLAG }
             }
             steps {
                 sh 'echo "Testing the system ..."'
@@ -39,9 +35,7 @@ pipeline {
         }
         stage('Check fast-deploy parameters') {
             when {
-                expression {
-                    return params.b2b_pipeline_action == 'fast-deploy'
-                }
+                expression { return params.B2B_FAST_DEPLOY_FLAG }
             }
             steps {
                 sh 'echo "Check fast-deploy params"'
@@ -49,9 +43,7 @@ pipeline {
         }
         stage('Deploy') {
             when {
-                expression {
-                    return params.b2b_pipeline_action == 'build-and-deploy' || params.b2b_pipeline_action == 'fast-deploy'
-                }
+                expression { return !params.B2B_FAST_DEPLOY_FLAG || params.B2B_FAST_DEPLOY_FLAG }
             }
             steps {
                 sh 'echo "Deploying the system ..."'
