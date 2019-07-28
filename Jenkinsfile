@@ -34,38 +34,36 @@ try {
 //    podTemplate(label: 'kubernetes-tools-extra-large', cloud: 'kubernetes-tools') {
 //        node('kubernetes-tools-extra-large') {
     node() {
-        try {
-            stage('Setup') {
-                checkout scm
+        stage('Setup') {
+            checkout scm
 //                    unlockGitCryptVault()
-            }
+        }
 
-            if (fullBuildRequired()) {
-                stage('Build') {
-                    echo 'Performing full build'
+        if (fullBuildRequired()) {
+            stage('Build') {
+                echo 'Performing full build'
 //                        build()
 //                        updateDisplayName()
-                }
-                stage('Publish to staging') {
-                    echo 'Performing publishing to staging'
+            }
+            stage('Publish to staging') {
+                echo 'Performing publishing to staging'
 //                        publishToStaging()
-                }
             }
+        }
 
-            if (fastBuildOnly()) {
-                stage('Check fast build parameters') {
-                    echo 'Performing fast build only'
-                        checkFastBuildParams()
-                }
+        if (fastBuildOnly()) {
+            stage('Check fast build parameters') {
+                echo 'Performing fast build only'
+                checkFastBuildParams()
             }
+        }
 
-            if (onMaster()) {
-                stage('Deploy all products to staging') {
-                    echo 'Deploy all products to staging'
-                }
-                stage('Publish to production') {
-                    echo 'Deploy all products to production'
-                }
+        if (onMaster()) {
+            stage('Deploy all products to staging') {
+                echo 'Deploy all products to staging'
+            }
+            stage('Publish to production') {
+                echo 'Deploy all products to production'
             }
         }
     }
@@ -73,13 +71,6 @@ try {
 } catch (error) {
     currentBuild.result = 'FAILED'
     throw error
-} finally {
-//    node {
-//        notifyBitbucketOfStatus()
-//        if (onMaster()) {
-//            mailBuildResult()
-//        }
-//    }
 }
 
 
