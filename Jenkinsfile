@@ -51,7 +51,7 @@ try {
             }
         }
 
-        if (fastBuildOnly()) {
+        if (fastBuildRequired()) {
             stage('Check fast build parameters') {
                 echo 'Performing fast build only'
                 checkFastBuildParams()
