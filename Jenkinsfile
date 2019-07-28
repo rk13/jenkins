@@ -3,6 +3,11 @@ pipeline {
     options {
         skipDefaultCheckout true
     }
+
+    parameters {
+        booleanParam(defaultValue: true, description: '', name: 'userFlag')
+    }
+    
     stages {
         stage('Checkout') {
             steps {
