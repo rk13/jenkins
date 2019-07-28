@@ -22,7 +22,7 @@ pipeline {
                 expression { return !params.B2B_FAST_DEPLOY_FLAG }
             }
             steps {
-                sh 'Building the system ..."'
+                sh 'Building the system ...'
             }
         }
         stage('Test') {
@@ -30,7 +30,7 @@ pipeline {
                 expression { return !params.B2B_FAST_DEPLOY_FLAG }
             }
             steps {
-                sh 'echo "Testing the system ..."'
+                sh 'echo "Testing the system ...'
             }
         }
         stage('Check fast-deploy parameters') {
@@ -38,7 +38,7 @@ pipeline {
                 expression { return params.B2B_FAST_DEPLOY_FLAG }
             }
             steps {
-                sh 'echo "Check fast-deploy params"'
+                sh 'echo "Check fast-deploy params'
             }
         }
         stage('Deploy') {
@@ -46,7 +46,7 @@ pipeline {
                 expression { return !params.B2B_FAST_DEPLOY_FLAG || params.B2B_FAST_DEPLOY_FLAG }
             }
             steps {
-                sh 'echo "Deploying the system ..."'
+                sh 'echo "Deploying the system ...'
             }
         }
     }
