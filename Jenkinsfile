@@ -1,72 +1,102 @@
-pipeline {
-    agent { label 'smith' }
+#!groovy
+def projectProperties = [[
+                                 $class  : 'BuildDiscarderProperty',
+                                 strategy: [
+                                         $class               : 'LogRotator',
+                                         numToKeepStr         : '8',
+                                         daysToKeepStr        : '15',
+                                         artifactNumToKeepStr : '8',
+                                         artifactDaysToKeepStr: '15'
+                                 ]
+                         ],
+                         parameters(
+                                 [booleanParam(name: 'replaceInstances', defaultValue: false,
+                                         description: 'Replace existing instances',),
 
-    options {
-        skipDefaultCheckout true
+                                  booleanParam(name: 'B2B_FAST_DEPLOY_FLAG', defaultValue: false,
+                                          description: 'Perform fast deployment of previous system build (docker image tag)'),
+                                  booleanParam(name: 'B2B_FAST_DEPLOY_LIVE', defaultValue: false,
+                                          description: 'Perform fast deployment to live system (only staging by default)'),
+                                  string(name: 'B2B_FAST_DEPLOY_VERSION', defaultValue: '',
+                                          description: 'Previous system build (docker image tag)')]
+                         )
+
+]
+properties(projectProperties)
+
+try {
+    // Init on master
+    node {
+        // The first milestone step starts tracking concurrent build order
+//         milestone()
+//         notifyBitbucketOfStatus()
     }
-
-    parameters {
-        booleanParam(name: 'B2B_FAST_DEPLOY_FLAG', defaultValue: false, description: 'Perform fast deployment of previous system build (docker image tag)')
-        booleanParam(name: 'B2B_FAST_DEPLOY_LIVE', defaultValue: false, description: 'Perform fast deployment to live system (only staging by default)')
-        string(name: 'B2B_FAST_DEPLOY_VERSION', defaultValue: '', description: 'Previous system build (docker image tag)')
-    }
-
-    stages {
-        stage('Checkout') {
-            steps {
+//    podTemplate(label: 'kubernetes-tools-extra-large', cloud: 'kubernetes-tools') {
+//        node('kubernetes-tools-extra-large') {
+    node() {
+        try {
+            stage('Setup') {
                 checkout scm
+//                    unlockGitCryptVault()
             }
-        }
-        stage('Build') {
-            when {
-                expression { return !params.B2B_FAST_DEPLOY_FLAG }
+
+            if (fullBuildRequired()) {
+                stage('Build') {
+                    echo 'Performing full build'
+//                        build()
+//                        updateDisplayName()
+                }
+                stage('Publish to staging') {
+                    echo 'Performing publishing to staging'
+//                        publishToStaging()
+                }
             }
-            steps {
-                sh 'Building the system ...'
+
+            if (fastBuildOnly()) {
+                stage('Check fast build parameters') {
+                    echo 'Performing fast build only'
+                        checkFastBuildParams()
+                }
             }
-        }
-        stage('Test') {
-            when {
-                expression { return !params.B2B_FAST_DEPLOY_FLAG }
-            }
-            steps {
-                sh 'echo "Testing the system ...'
-            }
-        }
-        stage('Check fast-deploy parameters') {
-            when {
-                expression { return params.B2B_FAST_DEPLOY_FLAG }
-            }
-            steps {
-                sh 'echo "Check fast-deploy params'
-            }
-        }
-        stage('Deploy') {
-            when {
-                expression { return !params.B2B_FAST_DEPLOY_FLAG || params.B2B_FAST_DEPLOY_FLAG }
-            }
-            steps {
-                sh 'echo "Deploying the system ...'
+
+            if (onMaster()) {
+                stage('Deploy all products to staging') {
+                    echo 'Deploy all products to staging'
+                }
+                stage('Publish to production') {
+                    echo 'Deploy all products to production'
+                }
             }
         }
     }
-    post {
-        always {
-            echo 'This will always run'
-        }
-        success {
-            echo 'This will run only if successful'
-        }
-        failure {
-            echo 'This will run only if failed'
-        }
-        unstable {
-            echo 'This will run only if the run was marked as unstable'
-        }
-        changed {
-            echo 'This will run only if the state of the Pipeline has changed'
-            echo 'For example, if the Pipeline was previously failing but is now successful'
-        }
-    }
+    currentBuild.result = 'SUCCESS'
+} catch (error) {
+    currentBuild.result = 'FAILED'
+    throw error
+} finally {
+//    node {
+//        notifyBitbucketOfStatus()
+//        if (onMaster()) {
+//            mailBuildResult()
+//        }
+//    }
 }
+
+
+private boolean onMaster() {
+    env.BRANCH_NAME == 'master'
+}
+
+private boolean fullBuildRequired() {
+    !params.B2B_FAST_DEPLOY_FLAG
+}
+
+private boolean fastBuildOnly() {
+    params.B2B_FAST_DEPLOY_FLAG
+}
+
+private void checkFastBuildParams() {
+    echo "Checking parameters"
+}
+
 
