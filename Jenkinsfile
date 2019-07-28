@@ -14,9 +14,9 @@ def projectProperties = [[
                                          description: 'Replace existing instances',),
 
                                   booleanParam(name: 'B2B_FAST_DEPLOY_FLAG', defaultValue: false,
-                                          description: 'Perform fast deployment of previous system build (docker image tag)'),
+                                          description: 'Perform fast deployment of specified previous system build (docker image tag)'),
                                   booleanParam(name: 'B2B_FAST_DEPLOY_LIVE', defaultValue: false,
-                                          description: 'Perform fast deployment to live system (only staging by default)'),
+                                          description: 'Perform fast deployment to Live system'),
                                   string(name: 'B2B_FAST_DEPLOY_VERSION', defaultValue: '',
                                           description: 'Previous system build (docker image tag)')]
                          )
@@ -82,12 +82,19 @@ private boolean fullBuildRequired() {
     !params.B2B_FAST_DEPLOY_FLAG
 }
 
-private boolean fastBuildOnly() {
+private boolean fastBuildRequired() {
     params.B2B_FAST_DEPLOY_FLAG
 }
 
 private void checkFastBuildParams() {
-    echo "Checking parameters"
+    echo "Checking fast build parameters"
+    echo "B2B_FAST_DEPLOY_FLAG: ${params.B2B_FAST_DEPLOY_FLAG}"
+    echo "B2B_FAST_DEPLOY_LIVE: ${params.B2B_FAST_DEPLOY_LIVE}"
+    echo "B2B_FAST_DEPLOY_VERSION: ${params.B2B_FAST_DEPLOY_VERSION}"
+
+    if (params.B2B_FAST_DEPLOY_VERSION == null && params.B2B_FAST_DEPLOY_VERSION == "") {
+        throw new Exception("B2B_FAST_DEPLOY_VERSION could not be empty for fast-deploy configuragion")
+    }
 }
 
 
