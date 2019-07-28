@@ -6,8 +6,8 @@ pipeline {
     }
 
     parameters {
-        string(name: 'Greeting', defaultValue: 'Hello', description: 'How should I greet the world?')
         booleanParam(name: 'B2B_FAST_DEPLOY_FLAG', defaultValue: false, description: 'Perform fast deployment of previous system build (docker image tag)')
+        booleanParam(name: 'B2B_FAST_DEPLOY_LIVE', defaultValue: false, description: 'Perform fast deployment to live system (only staging by default)')
         string(name: 'B2B_FAST_DEPLOY_VERSION', defaultValue: null, description: 'Previous system build (docker image tag)')
     }
 
