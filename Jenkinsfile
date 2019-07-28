@@ -5,14 +5,23 @@ pipeline {
     }
 
     parameters {
-        booleanParam(defaultValue: true, description: '', name: 'userFlag')
+        string(name: 'Greeting', defaultValue: 'Hello', description: 'How should I greet the world?')
+        booleanParam(defaultValue: false, description: 'Perform rollback to previous system state (docker image tag)', name: 'performRollback')
     }
-    
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
+        }
+        if ($ { params.performRollback }) {
+            stage('Rollback') {
+                steps {
+                    sh 'echo "Performing rollback"'
+                }
+            }
+
         }
         stage('Build') {
             steps {
