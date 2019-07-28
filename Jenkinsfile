@@ -1,13 +1,17 @@
 pipeline {
     //agent { label 'smith' }
-    
+
     options {
         skipDefaultCheckout true
     }
 
     parameters {
         string(name: 'Greeting', defaultValue: 'Hello', description: 'How should I greet the world?')
-        booleanParam(defaultValue: false, description: 'Perform rollback to previous system state (docker image tag)', name: 'performRollback')
+
+        choice(name: 'b2b_pipeline_action',
+                description: 'Perform full build pipeline (default) or fast deployment of previous system build (docker image tag)',
+                choices: ['build-and-deploy', 'fast-deploy'],
+                defaultValue: 'build-and-deploy')
     }
 
     stages {
@@ -16,28 +20,40 @@ pipeline {
                 checkout scm
             }
         }
-        if ($ { params.performRollback }) {
-            stage('Rollback') {
-                steps {
-                    sh 'echo "Performing rollback"'
-                }
-            }
-
-        }
         stage('Build') {
+            when {
+                expression { return params.b2b_pipeline_action == 'build-and-deploy' }
+            }
             steps {
-                retry(3) {
-                    sh 'echo "Hello World"'
-                    sh '''
-                    echo "Multiline shell steps works too"
-                    ls -lah
-                '''
-                }
+                sh 'Building the system ..."'
             }
         }
         stage('Test') {
+            when {
+                expression { return params.b2b_pipeline_action == 'build-and-deploy' }
+            }
             steps {
-                sh 'echo "Testing ..."'
+                sh 'echo "Testing the system ..."'
+            }
+        }
+        stage('Check fast-deploy parameters') {
+            when {
+                expression {
+                    return params.b2b_pipeline_action == 'fast-deploy'
+                }
+            }
+            steps {
+                sh 'echo "Check fast-deploy params"'
+            }
+        }
+        stage('Deploy') {
+            when {
+                expression {
+                    return params.b2b_pipeline_action == 'build-and-deploy' || params.b2b_pipeline_action == 'fast-deploy'
+                }
+            }
+            steps {
+                sh 'echo "Deploying the system ..."'
             }
         }
     }
