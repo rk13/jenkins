@@ -17,7 +17,7 @@ def projectProperties = [[
                                           description: 'Perform fast deployment of specified previous system build (docker image tag)'),
                                   booleanParam(name: 'B2B_FAST_DEPLOY_LIVE', defaultValue: false,
                                           description: 'Perform fast deployment to Live system'),
-                                  string(name: 'B2B_FAST_DEPLOY_VERSION', defaultValue: 'UNKNOWN',
+                                  string(name: 'B2B_FAST_DEPLOY_VERSION', defaultValue: '',
                                           description: 'Previous system build (docker image tag)')]
                          )
 
@@ -92,7 +92,7 @@ private void checkFastBuildParams() {
     echo "B2B_FAST_DEPLOY_LIVE: ${params.B2B_FAST_DEPLOY_LIVE}"
     echo "B2B_FAST_DEPLOY_VERSION: ${params.B2B_FAST_DEPLOY_VERSION}"
 
-    if (params.B2B_FAST_DEPLOY_VERSION == null && params.B2B_FAST_DEPLOY_VERSION == 'UNKNOWN') {
+    if (params.B2B_FAST_DEPLOY_VERSION == null || params.B2B_FAST_DEPLOY_VERSION == '') {
         throw new Exception("B2B_FAST_DEPLOY_VERSION could not be empty for fast-deploy configuragion")
     }
 }
